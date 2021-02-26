@@ -17,19 +17,14 @@ import math
 myFmt = mdates.DateFormatter('%Y-%m-%d')
 
 def make_custom_plot(dataframe, filename, name):
-    # fig, ax = plt.subplots(figsize=(10, 10))
-    # y=np.array(dataframe[name + '_value'].values, dtype=float)
     x_orig = pd.to_datetime(dataframe['date'])
     x=np.array(pd.to_datetime(dataframe['date']).index.values, dtype=float)
-    # x = pd.to_datetime(dataframe['date'])
     y_orig = dataframe[name + '_value']
     y_mean = np.mean(y_orig)
     y = np.array(y_orig) - y_mean
     stats = linregress(x, y)
     m = stats.slope
     b = stats.intercept
-    # ax.plot(x_orig, y)
-    # ax.plot(x_orig, m * x + b, color="red")
     regres_y = m * x + b
     result_row = []
     for index, value in enumerate(regres_y):
@@ -45,7 +40,6 @@ def make_custom_plot(dataframe, filename, name):
         for index, value in enumerate(result_row):
             sinus = math.sin(2 * math.pi / 365.25 * index + day)
             sinus_row.append(sinus)
-        # print(sinus_row)
         sinus_row = np.array(sinus_row, dtype=float)
         sinus_regr = linregress(sinus_row, result_row)
         sinus_m = sinus_regr.slope
@@ -65,6 +59,8 @@ def make_custom_plot(dataframe, filename, name):
     final_m = final_regr.slope
     final_b = final_regr.intercept
     speed_mm_per_year = final_m * 1000 * 365.25
+
+    
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.plot(x, sinus_result, color='green')
     ax.plot(x, y)
