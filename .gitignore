@@ -11,6 +11,7 @@ logs/
 *.pid
 *.toc
 *.out
+*.png
 *.pickle
 celerybeat-schedule                                                                     
 .ipynb_checkpoints
