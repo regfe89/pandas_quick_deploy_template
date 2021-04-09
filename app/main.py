@@ -1,8 +1,9 @@
 #! env/bin/python
 import pandas as pd
-import re
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 import os
-import fnmatch
 from shutil import copyfile
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -10,11 +11,18 @@ from scipy.stats import linregress
 import matplotlib.dates as mdates
 import matplotlib
 import numpy as np
-from statsmodels.tsa.seasonal import seasonal_decompose
-from pprint import pprint
 import math
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+import io
 
 myFmt = mdates.DateFormatter('%Y-%m-%d')
+templates = Jinja2Templates(directory="templates")
+app = FastAPI()
+
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    make_custom()
+    return templates.TemplateResponse("index.html", {"request": request})
 
 def make_custom_plot(dataframe, filename, name):
     x_orig = pd.to_datetime(dataframe['date'])
@@ -72,25 +80,7 @@ def make_custom_plot(dataframe, filename, name):
     plt.setp(ax.get_xticklabels(), rotation=45)
     plt.savefig('final_regr' + '_' + filename + '_' + name + ".png")
 
-    fig, ax = plt.subplots(figsize=(10, 10))
-    ax.plot(x_orig, sinus_result, color='green')
-    ax.plot(x_orig, y)
-    ax.plot(x_orig, final_m * x + final_b, color="red")
-    ax.get_yaxis().set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
-    ax.xaxis.set_major_formatter(myFmt)
-    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(speed_mm_per_year) + ' mm per year')
-    plt.setp(ax.get_xticklabels(), rotation=45)
-    plt.savefig('original_with_regr' + '_' + filename + '_' + name + ".png")
 
-    fig, ax = plt.subplots(figsize=(10, 10))
-    ax.plot(x_orig, y)
-    ax.get_yaxis().set_major_formatter(
-        matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
-    ax.xaxis.set_major_formatter(myFmt)
-    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(speed_mm_per_year) + ' mm per year')
-    plt.setp(ax.get_xticklabels(), rotation=45)
-    plt.savefig('original' + '_' + filename + '_' + name + ".png")
 
     
 
@@ -105,6 +95,26 @@ def make_custom():
 
 
 
-make_custom()
+# make_custom()
 
 
+# old plots
+    # fig, ax = plt.subplots(figsize=(10, 10))
+    # ax.plot(x_orig, sinus_result, color='green')
+    # ax.plot(x_orig, y)
+    # ax.plot(x_orig, final_m * x + final_b, color="red")
+    # ax.get_yaxis().set_major_formatter(
+    #     matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
+    # ax.xaxis.set_major_formatter(myFmt)
+    # ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(speed_mm_per_year) + ' mm per year')
+    # plt.setp(ax.get_xticklabels(), rotation=45)
+    # plt.savefig('original_with_regr' + '_' + filename + '_' + name + ".png")
+
+    # fig, ax = plt.subplots(figsize=(10, 10))
+    # ax.plot(x_orig, y)
+    # ax.get_yaxis().set_major_formatter(
+    #     matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
+    # ax.xaxis.set_major_formatter(myFmt)
+    # ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(speed_mm_per_year) + ' mm per year')
+    # plt.setp(ax.get_xticklabels(), rotation=45)
+    # plt.savefig('original' + '_' + filename + '_' + name + ".png")
