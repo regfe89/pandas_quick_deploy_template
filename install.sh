@@ -8,4 +8,5 @@ pip install uvicorn
 pip install jinja2
 pip install scipy
 pip install  matplotlib
+pip install aiofiles
 pip freeze -> requirements.txt

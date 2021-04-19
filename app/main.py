@@ -3,6 +3,7 @@ import pandas as pd
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import os
 from shutil import copyfile
 import datetime as dt
@@ -18,18 +19,24 @@ import io
 myFmt = mdates.DateFormatter('%Y-%m-%d')
 templates = Jinja2Templates(directory="templates")
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     make_custom()
-    return templates.TemplateResponse("index.html", {"request": request})
+    plots = os.listdir('static/plots')
+    plots = ['plots/' + file for file in plots]
+    # return render_template('report.html', hists = hists)
+    return templates.TemplateResponse("index.html", {"request": request, "plots": plots})
 
 def make_custom_plot(dataframe, filename, name):
     x_orig = pd.to_datetime(dataframe['date'])
     x=np.array(pd.to_datetime(dataframe['date']).index.values, dtype=float)
     y_orig = dataframe[name + '_value']
+    y_orig = abs(y_orig)
     y_mean = np.mean(y_orig)
-    y = np.array(y_orig) - y_mean
+    y = np.array(y_orig)
+    # y = y
     stats = linregress(x, y)
     m = stats.slope
     b = stats.intercept
@@ -61,12 +68,28 @@ def make_custom_plot(dataframe, filename, name):
             min_sigma = sigma
             min_value_shift = day
             sinus_result = sinus_regr_result
+        
+    
 
     y_sin = np.array(y) - np.array(sinus_result)
+
+
     final_regr = linregress(x, y_sin)
+
+
     final_m = final_regr.slope
     final_b = final_regr.intercept
+    final_stderr = final_regr.stderr
+    final_intercept_stderr = final_regr.intercept_stderr
+
     speed_mm_per_year = final_m * 1000 * 365.25
+    sinus_result = sinus_result + y_mean
+
+    # r = np.array(y_sin) - np.array(final_m * x + final_b)
+    # r_mean = np.mean(r)
+    # r_diff = np.array((r-r_mean)**2)
+
+    # print(r_diff)
 
     
     fig, ax = plt.subplots(figsize=(10, 10))
@@ -76,9 +99,9 @@ def make_custom_plot(dataframe, filename, name):
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
     # ax.xaxis.set_major_formatter(myFmt)
-    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(speed_mm_per_year) + ' mm per year')
+    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(round(speed_mm_per_year, 3)) + ' mm per year, stderr = ' + str(final_stderr))
     plt.setp(ax.get_xticklabels(), rotation=45)
-    plt.savefig('final_regr' + '_' + filename + '_' + name + ".png")
+    plt.savefig('static/plots/final_regr' + '_' + filename + '_' + name + ".png")
 
 
 
