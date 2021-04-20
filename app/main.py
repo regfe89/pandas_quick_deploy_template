@@ -99,7 +99,7 @@ def make_custom_plot(dataframe, filename, name):
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
     # ax.xaxis.set_major_formatter(myFmt)
-    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(round(speed_mm_per_year, 2)) + ' mm per year, +-stderr = ' + str(final_stderr))
+    ax.set(xlabel='day', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(round(speed_mm_per_year, 2)) + ' mm per year, +-stderr = ' + str(final_stderr))
     plt.setp(ax.get_xticklabels(), rotation=45)
     plt.savefig('static/plots/final_regr' + '_' + filename + '_' + name + ".png")
 
