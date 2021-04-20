@@ -24,7 +24,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     make_custom()
-    plots = os.listdir('static/plots')
+    plots = sorted(os.listdir('static/plots'))
     plots = ['plots/' + file for file in plots]
     # return render_template('report.html', hists = hists)
     return templates.TemplateResponse("index.html", {"request": request, "plots": plots})
@@ -33,7 +33,7 @@ def make_custom_plot(dataframe, filename, name):
     x_orig = pd.to_datetime(dataframe['date'])
     x=np.array(pd.to_datetime(dataframe['date']).index.values, dtype=float)
     y_orig = dataframe[name + '_value']
-    y_orig = abs(y_orig)
+    y_orig = y_orig
     y_mean = np.mean(y_orig)
     y = np.array(y_orig)
     # y = y
@@ -99,7 +99,7 @@ def make_custom_plot(dataframe, filename, name):
     ax.get_yaxis().set_major_formatter(
         matplotlib.ticker.FuncFormatter(lambda x, p: format(round(float(x), 4), ',')))
     # ax.xaxis.set_major_formatter(myFmt)
-    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(round(speed_mm_per_year, 2)) + ' mm per year, stderr = ' + str(final_stderr))
+    ax.set(xlabel='date', ylabel='baseline length', title= filename + ' ' + name + ' baseline time series, speed = ' + str(round(speed_mm_per_year, 2)) + ' mm per year, +-stderr = ' + str(final_stderr))
     plt.setp(ax.get_xticklabels(), rotation=45)
     plt.savefig('static/plots/final_regr' + '_' + filename + '_' + name + ".png")
 
